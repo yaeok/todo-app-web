@@ -2,7 +2,9 @@
 import React from 'react'
 
 import {
+  Box,
   Button,
+  ButtonGroup,
   Checkbox,
   Flex,
   Heading,
@@ -34,6 +36,7 @@ const ToDoListView = () => {
     deletedAt: '',
     isActive: false,
   })
+  const [isCompleted, setIsCompleted] = React.useState<boolean>(false)
   const { isOpen, onOpen, onClose } = useDisclosure()
 
   React.useEffect(() => {
@@ -78,9 +81,49 @@ const ToDoListView = () => {
     onOpen()
   }
 
+  const unCompletedTodos = () => {
+    const lstUpdTodo: Todo[] = todos.filter(
+      (todo) => todo.isCompleted === false
+    )
+    setTodos(lstUpdTodo)
+    console.log('unCompletedTodos' + lstUpdTodo)
+    setIsCompleted(false)
+  }
+
+  const completedTodos = () => {
+    const lstUpdTodo: Todo[] = todos.filter((todo) => todo.isCompleted === true)
+    setTodos(lstUpdTodo)
+    console.log('completedTodos')
+    setIsCompleted(true)
+  }
+
   return (
     <div>
-      <Heading textDecoration={'none'}>To Do List</Heading>
+      <Heading>To Do List</Heading>
+      <Flex flexDirection='row'>
+        <Flex
+          width='50%'
+          border='1px'
+          borderColor='gray.200'
+          borderTopLeftRadius='md'
+          borderBottomLeftRadius='md'
+          justify='center'
+          onClick={unCompletedTodos}
+        >
+          <Text>未完了</Text>
+        </Flex>
+        <Flex
+          width='50%'
+          border='1px'
+          borderColor='gray.200'
+          borderTopRightRadius='md'
+          borderBottomRightRadius='md'
+          justify='center'
+          onClick={completedTodos}
+        >
+          完了済
+        </Flex>
+      </Flex>
       {todos.map((todo, index) => (
         <Flex
           key={index}

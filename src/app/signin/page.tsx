@@ -1,27 +1,18 @@
 'use client'
-import NextLink from 'next/link'
-import { useRouter } from 'next/navigation'
-import { useState } from 'react'
-import { useForm } from 'react-hook-form'
+import NextLink from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
 
-import Loading from '@/components/loading.component'
-import { signInWithEmail } from '@/libs/firebase/auth'
+import Loading from '@/components/loading.component';
+import { signInWithEmail } from '@/libs/firebase/auth';
 import {
-  Button,
-  Flex,
-  FormControl,
-  FormErrorMessage,
-  FormLabel,
-  Heading,
-  Input,
-  InputGroup,
-  InputRightElement,
-  useToast,
-  VStack,
-} from '@chakra-ui/react'
+  Button, Flex, FormControl, FormErrorMessage, FormLabel, Heading, Input, InputGroup,
+  InputRightElement, useToast, VStack
+} from '@chakra-ui/react';
 
 // フォームで使用する変数の型を定義
-type formInputs = {
+type FormInputs = {
   email: string
   password: string
   confirm: string
@@ -34,7 +25,7 @@ const SignInView = () => {
     handleSubmit,
     register,
     formState: { errors, isSubmitting },
-  } = useForm<formInputs>()
+  } = useForm<FormInputs>()
   const [show, setShow] = useState<boolean>(false)
   const [loading, setLoading] = useState<boolean>(false)
 

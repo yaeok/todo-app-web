@@ -36,7 +36,7 @@ export const signInWithEmail = async (args: {
       args.password
     )
     const user = signInUser.user
-    const docRef = doc(db, 'user', user.uid)
+    const docRef = doc(db, 'users', user.uid)
 
     const docSnap = await getDoc(docRef)
     if (docSnap.exists()) {
@@ -97,7 +97,7 @@ export const signUpWithEmail = async (args: {
       args.password
     )
     const user = signUpUser.user
-    const docRef = doc(db, 'user', user.uid)
+    const docRef = doc(db, 'users', user.uid)
 
     const docSnap = await getDoc(docRef)
     if (docSnap.exists()) {

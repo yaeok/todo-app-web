@@ -5,12 +5,7 @@ import { Container } from '@/design'
 
 export default function Main({ children }: { children: ReactNode }) {
   return (
-    <Container
-      as='main'
-      maxW='container.lg'
-      my='2'
-      minH='calc(100vh - 115px - 2rem)'
-    >
+    <Container as='main' maxW='container.lg' minH='100vh'>
       {children}
     </Container>
   )

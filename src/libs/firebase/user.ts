@@ -8,7 +8,7 @@ import { db } from '@/libs/config'
  * @returns
  */
 export const getUserInfoByUid = async (args: { uid: string }) => {
-  const docRef = doc(db, 'user', args.uid)
+  const docRef = doc(db, 'users', args.uid)
   return new Promise<User>((resolve, reject) => {
     const unsubscribe = onSnapshot(
       docRef,

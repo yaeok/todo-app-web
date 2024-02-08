@@ -46,7 +46,6 @@ export const signInWithEmail = async (args: {
         uid: user.uid,
         username: user.email?.substring(0, user.email.indexOf('@')),
         email: user.email,
-        type: 'coach',
         createdAt: serverTimestamp(),
         updatedAt: null,
         deletedAt: null,

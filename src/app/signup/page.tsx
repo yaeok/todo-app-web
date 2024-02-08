@@ -19,7 +19,7 @@ import {
 } from '@chakra-ui/react'
 
 // フォームで使用する変数の型を定義
-type formInputs = {
+type FormInputs = {
   username: string
   email: string
   password: string
@@ -34,11 +34,11 @@ const SignUpView = () => {
     register,
     getValues,
     formState: { errors, isSubmitting },
-  } = useForm<formInputs>()
+  } = useForm<FormInputs>()
   const [password, setPassword] = useState(false)
   const [confirm, setConfirm] = useState(false)
 
-  const onSubmit = handleSubmit(async (data) => {
+  const onSubmit = handleSubmit(async (data: FormInputs) => {
     await signUpWithEmail({
       username: data.username,
       email: data.email,

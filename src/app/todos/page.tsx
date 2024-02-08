@@ -1,4 +1,13 @@
 'use client'
+import {
+  collection,
+  DocumentData,
+  onSnapshot,
+  orderBy,
+  query,
+  QueryDocumentSnapshot,
+  where,
+} from 'firebase/firestore'
 import React from 'react'
 import { useForm } from 'react-hook-form'
 import { IoAddOutline } from 'react-icons/io5'
@@ -27,7 +36,8 @@ import {
   useDisclosure,
   VStack,
 } from '@/design'
-import { getTodoList, registerTodo } from '@/libs/firebase/todo'
+import { db } from '@/libs/config'
+import { registerTodo, updateIsCompleted } from '@/libs/firebase/todo'
 import { Todo } from '@/models/todo.model'
 import { userState } from '@/states/user'
 
@@ -45,29 +55,54 @@ const ToDoListView = () => {
   const {
     handleSubmit,
     register,
+    reset,
     formState: { errors, isSubmitting },
   } = useForm<FormInputs>()
   const user = useRecoilValue(userState)
   const [loading, setLoading] = React.useState<boolean>(true)
 
   React.useEffect(() => {
-    const fetchData = async () => {
-      const lstTodos = await getTodoList({ uid: user!.uid })
+    if (user) {
+      const colRef = collection(db, 'users', user!.uid, 'todos')
+      const q = query(
+        colRef,
+        where('isActive', '==', true),
+        orderBy('createdAt', 'desc')
+      )
 
-      setTodos(lstTodos)
-
-      const lstUpdTodo: Todo[] = lstTodos.filter((todo) => {
-        return todo.isCompleted === false
+      const unsubscribe = onSnapshot(q, async (snapshot) => {
+        const lstTodo: Todo[] = []
+        snapshot.forEach(
+          (doc: QueryDocumentSnapshot<DocumentData, DocumentData>) => {
+            const recTodo = {
+              todoId: doc.data().todoId,
+              title: doc.data().title,
+              description: doc.data().description,
+              isCompleted: doc.data().isCompleted,
+              completedAt: doc.data().completedAt,
+              createdAt: doc.data().createdAt,
+              updatedAt: doc.data().updatedAt,
+              deletedAt: doc.data().deletedAt,
+              isActive: doc.data().isActive,
+            }
+            lstTodo.push(recTodo)
+          }
+        )
+        setTodos(lstTodo)
+        const lstUpdTodo: Todo[] = lstTodo.filter((todo: Todo) => {
+          return todo.isCompleted === false
+        })
+        setUpdTodos(lstUpdTodo)
+        setLoading(false)
       })
-
-      setUpdTodos(lstUpdTodo)
-      setLoading(false)
+      return () => {
+        unsubscribe()
+      }
     }
-    fetchData()
   }, [])
 
   const unCompletedTodos = () => {
-    const lstUpdTodo: Todo[] = todos.filter((todo) => {
+    const lstUpdTodo: Todo[] = todos.filter((todo: Todo) => {
       return todo.isCompleted === false
     })
     setUpdTodos(lstUpdTodo)
@@ -75,22 +110,34 @@ const ToDoListView = () => {
   }
 
   const completedTodos = () => {
-    const lstUpdTodo: Todo[] = todos.filter((todo) => {
+    const lstUpdTodo: Todo[] = todos.filter((todo: Todo) => {
       return todo.isCompleted === true
     })
     setUpdTodos(lstUpdTodo)
     setIsSelect(true)
   }
 
-  const onSubmit = handleSubmit(async (data) => {
+  const onSubmit = handleSubmit(async (data: FormInputs) => {
     registerTodo({
       uid: user!.uid,
       title: data.title,
       description: data.description,
-    }).then(() => {
+    }).then(async () => {
+      reset()
       onClose()
     })
   })
+
+  const onChangeCheckbox = async (args: {
+    event: React.ChangeEvent<HTMLInputElement>
+    todoId: string
+  }) => {
+    await updateIsCompleted({
+      uid: user!.uid,
+      todoId: args.todoId,
+      isCompleted: args.event.target.checked,
+    })
+  }
 
   return loading ? (
     <Loading />
@@ -100,18 +147,18 @@ const ToDoListView = () => {
         top='0'
         zIndex='10'
         position='sticky'
-        paddingBottom='8px'
+        paddingY='8px'
         flexDirection='column'
         bg='white'
-        gap='12px'
+        gap='4px'
       >
         <Flex
           flexDirection='row'
           justifyContent='space-between'
           alignItems='center'
         >
-          <Heading padding='8px'>To Do List</Heading>
-          <IconButton
+          <Heading padding='8px'>Todo</Heading>
+          <Button
             aria-label=''
             bg='white'
             shadow='lg'
@@ -120,8 +167,8 @@ const ToDoListView = () => {
             border='2px'
             borderColor='gray.400'
           >
-            <IoAddOutline />
-          </IconButton>
+            登録
+          </Button>
         </Flex>
         <Flex flexDirection='row'>
           <Flex
@@ -161,7 +208,14 @@ const ToDoListView = () => {
           padding='4px 8px'
           scrollSnapStop='always'
         >
-          <Checkbox defaultChecked={todo.isCompleted} />
+          <Checkbox
+            key={todo.todoId}
+            disabled={todo.isCompleted}
+            defaultChecked={todo.isCompleted ? true : false}
+            onChange={(e) =>
+              onChangeCheckbox({ event: e, todoId: todo.todoId })
+            }
+          />
           <Flex flexDirection='column' marginLeft='8px'>
             <Text fontWeight='bold'>{todo.title}</Text>
             <Text fontSize='sm' color='gray.400' inlineSize='80vw'>
@@ -180,7 +234,7 @@ const ToDoListView = () => {
         <ModalOverlay />
         <ModalContent>
           <ModalHeader fontSize='16px'>新規TODO</ModalHeader>
-          <ModalCloseButton />
+          <ModalCloseButton onClick={() => reset()} />
           <form onSubmit={onSubmit}>
             <ModalBody>
               <VStack spacing='4' alignItems='left'>

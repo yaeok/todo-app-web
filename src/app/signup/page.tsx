@@ -1,4 +1,5 @@
 'use client'
+import NextLink from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -202,6 +203,15 @@ const SignUpView = () => {
               paddingX='auto'
             >
               新規登録
+            </Button>
+            <Button
+              as={NextLink}
+              bg='white'
+              color='black'
+              href='/signin'
+              width='100%'
+            >
+              ログインはこちらから
             </Button>
           </Flex>
         </form>

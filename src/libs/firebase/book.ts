@@ -8,15 +8,16 @@ import {
 
 import { db } from '@/libs/config'
 
-export const registerTodo = async (args: {
+export const registerBook = async (args: {
   title: string
   description: string
   uid: string
 }) => {
-  const colRef = collection(db, 'users', args.uid, 'todos')
+  const colRef = collection(db, 'users', args.uid, 'books')
   await addDoc(colRef, {
     title: args.title,
     description: args.description,
+    favorite: false,
     isCompleted: false,
     createdAt: serverTimestamp(),
     updatedAt: null,
@@ -24,22 +25,39 @@ export const registerTodo = async (args: {
     completedAt: null,
     isActive: true,
   }).then((docRef) => {
-    setDoc(docRef, { todoId: docRef.id }, { merge: true })
+    setDoc(docRef, { bookId: docRef.id }, { merge: true })
   })
 }
 
-export const updateIsCompletedByTodoId = async (args: {
+export const updateIsCompletedbyBookId = async (args: {
   uid: string
-  todoId: string
+  bookId: string
   isCompleted: boolean
 }) => {
-  const docRef = doc(db, 'users', args.uid, 'todos', args.todoId)
+  const docRef = doc(db, 'users', args.uid, 'books', args.bookId)
   await setDoc(
     docRef,
     {
       isCompleted: args.isCompleted,
       updatedAt: serverTimestamp(),
       completedAt: args.isCompleted ? serverTimestamp() : null,
+    },
+    { merge: true }
+  )
+}
+
+export const updateFavoritebyBookId = async (args: {
+  uid: string
+  bookId: string
+  favorite: boolean
+}) => {
+  const docRef = doc(db, 'users', args.uid, 'books', args.bookId)
+  await setDoc(
+    docRef,
+    {
+      favorite: args.favorite,
+      updatedAt: serverTimestamp(),
+      completedAt: args.favorite ? serverTimestamp() : null,
     },
     { merge: true }
   )

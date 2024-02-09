@@ -42,7 +42,7 @@ import {
 } from '@/design'
 import { db } from '@/libs/config'
 import { registerTrip, updateIsCompletedbyTripId } from '@/libs/firebase/trip'
-import { Todo } from '@/models/todo.model'
+import { Trip } from '@/models/trip.model'
 import { userState } from '@/states/user'
 
 // フォームで使用する変数の型を定義
@@ -64,14 +64,19 @@ const tabList = [
   },
   {
     id: 3,
+    name: '行った',
+    status: 'went',
+  },
+  {
+    id: 4,
     name: 'お気に入り',
     status: 'favorite',
   },
 ]
 
 const TripListView = () => {
-  const [todos, setTodos] = React.useState<Todo[]>([])
-  const [updTodos, setUpdTodos] = React.useState<Todo[]>([])
+  const [trips, setTrips] = React.useState<Trip[]>([])
+  const [updTrips, setUpdTrips] = React.useState<Trip[]>([])
   const [isSelect, setIsSelect] = React.useState<boolean>(false)
   const { isOpen, onOpen, onClose } = useDisclosure()
   const {
@@ -93,13 +98,14 @@ const TripListView = () => {
       )
 
       const unsubscribe = onSnapshot(q, async (snapshot) => {
-        const lstTodo: Todo[] = []
+        const lstTrip: Trip[] = []
         snapshot.forEach(
           (doc: QueryDocumentSnapshot<DocumentData, DocumentData>) => {
-            const recTodo = {
-              todoId: doc.data().todoId,
+            const recTrip = {
+              tripId: doc.data().tripId,
               title: doc.data().title,
               description: doc.data().description,
+              favorite: doc.data().favorite,
               isCompleted: doc.data().isCompleted,
               completedAt: doc.data().completedAt,
               createdAt: doc.data().createdAt,
@@ -107,14 +113,14 @@ const TripListView = () => {
               deletedAt: doc.data().deletedAt,
               isActive: doc.data().isActive,
             }
-            lstTodo.push(recTodo)
+            lstTrip.push(recTrip)
           }
         )
-        setTodos(lstTodo)
-        const lstUpdTodo: Todo[] = lstTodo.filter((todo: Todo) => {
-          return todo.isCompleted === false
+        setTrips(lstTrip)
+        const lstUpdTrip: Trip[] = lstTrip.filter((trip: Trip) => {
+          return trip.isCompleted === false
         })
-        setUpdTodos(lstUpdTodo)
+        setUpdTrips(lstUpdTrip)
         setLoading(false)
       })
       return () => {
@@ -123,19 +129,19 @@ const TripListView = () => {
     }
   }, [])
 
-  const unCompletedTodos = () => {
-    const lstUpdTodo: Todo[] = todos.filter((todo: Todo) => {
-      return todo.isCompleted === false
+  const unCompletedTrips = () => {
+    const lstUpdTrip: Trip[] = trips.filter((trip: Trip) => {
+      return trip.isCompleted === false
     })
-    setUpdTodos(lstUpdTodo)
+    setUpdTrips(lstUpdTrip)
     setIsSelect(false)
   }
 
-  const completedTodos = () => {
-    const lstUpdTodo: Todo[] = todos.filter((todo: Todo) => {
-      return todo.isCompleted === true
+  const completedTrips = () => {
+    const lstUpdTrip: Trip[] = trips.filter((trip: Trip) => {
+      return trip.isCompleted === true
     })
-    setUpdTodos(lstUpdTodo)
+    setUpdTrips(lstUpdTrip)
     setIsSelect(true)
   }
 
@@ -198,7 +204,9 @@ const TripListView = () => {
           </Flex>
           <TabList>
             {tabList.map((tab, index) => (
-              <Tab key={index}>{tab.name}</Tab>
+              <Tab key={index} fontSize='12px'>
+                {tab.name}
+              </Tab>
             ))}
           </TabList>
         </Flex>

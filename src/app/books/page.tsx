@@ -203,7 +203,9 @@ const BookListView = () => {
           </Flex>
           <TabList>
             {tabList.map((tab, index) => (
-              <Tab key={index}>{tab.name}</Tab>
+              <Tab key={index} fontSize='12px'>
+                {tab.name}
+              </Tab>
             ))}
           </TabList>
         </Flex>

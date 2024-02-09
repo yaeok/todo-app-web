@@ -30,6 +30,11 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
+  Tab,
+  TabList,
+  TabPanel,
+  TabPanels,
+  Tabs,
   Text,
   Textarea,
   useDisclosure,
@@ -45,6 +50,24 @@ type FormInputs = {
   title: string
   description: string
 }
+
+const tabList = [
+  {
+    id: 1,
+    name: '予定',
+    status: 'plan',
+  },
+  {
+    id: 2,
+    name: '完了',
+    status: 'completed',
+  },
+  {
+    id: 3,
+    name: '全てのTodo',
+    status: 'all',
+  },
+]
 
 const TodoListView = () => {
   const [todos, setTodos] = React.useState<Todo[]>([])
@@ -116,6 +139,23 @@ const TodoListView = () => {
     setIsSelect(true)
   }
 
+  const onChangeTab = (status: string) => {
+    console.log(status)
+    switch (status) {
+      case 'plan':
+        unCompletedTodos()
+        break
+      case 'completed':
+        completedTodos()
+        break
+      case 'all':
+        setUpdTodos(todos)
+        break
+      default:
+        break
+    }
+  }
+
   const onSubmit = handleSubmit(async (data: FormInputs) => {
     registerTodo({
       uid: user!.uid,
@@ -142,90 +182,87 @@ const TodoListView = () => {
     <Loading />
   ) : (
     <div>
-      <Flex
-        top='0'
-        zIndex='10'
-        position='sticky'
-        paddingY='8px'
-        flexDirection='column'
-        bg='white'
-        gap='4px'
-      >
+      <Tabs>
         <Flex
-          flexDirection='row'
-          justifyContent='space-between'
-          alignItems='center'
+          top='0'
+          zIndex='10'
+          position='sticky'
+          paddingY='8px'
+          flexDirection='column'
+          bg='white'
+          gap='4px'
         >
-          <Flex flexDirection='row' alignItems='center'>
-            <DrawerBtn />
-            <Heading padding='8px'>TODO</Heading>
-          </Flex>
-          <Button
-            aria-label=''
-            bg='white'
-            shadow='lg'
-            borderRadius='25'
-            onClick={onOpen}
-            border='2px'
-            borderColor='gray.400'
-          >
-            登録
-          </Button>
-        </Flex>
-        <Flex flexDirection='row'>
           <Flex
-            width='50%'
-            border='1px'
-            borderColor='gray.200'
-            borderTopLeftRadius='md'
-            borderBottomLeftRadius='md'
-            justify='center'
-            onClick={unCompletedTodos}
-            bg={isSelect ? 'white' : 'gray.200'}
+            flexDirection='row'
+            justifyContent='space-between'
+            alignItems='center'
           >
-            <Text>未完了</Text>
+            <Flex flexDirection='row' alignItems='center'>
+              <DrawerBtn />
+              <Heading padding='8px'>MY TODO</Heading>
+            </Flex>
+            <Button
+              aria-label=''
+              bg='white'
+              shadow='lg'
+              borderRadius='25'
+              onClick={onOpen}
+              border='2px'
+              borderColor='gray.400'
+            >
+              登録
+            </Button>
           </Flex>
-          <Flex
-            width='50%'
-            border='1px'
-            borderColor='gray.200'
-            borderTopRightRadius='md'
-            borderBottomRightRadius='md'
-            justify='center'
-            onClick={completedTodos}
-            bg={isSelect ? 'gray.200' : 'white'}
-          >
-            完了済
-          </Flex>
+          <TabList>
+            {tabList.map((tab, index) => (
+              <Tab
+                key={index}
+                fontSize='12px'
+                onClick={() => onChangeTab(tab.status)}
+              >
+                {tab.name}
+              </Tab>
+            ))}
+          </TabList>
         </Flex>
-      </Flex>
-      {updTodos.map((todo, index) => (
-        <Flex
-          key={index}
-          flexDirection='row'
-          border='1px'
-          borderRadius='md'
-          borderColor='gray.200'
-          marginY='4px'
-          padding='4px 8px'
-          scrollSnapStop='always'
-        >
-          <Checkbox
-            key={todo.todoId}
-            disabled={todo.isCompleted}
-            defaultChecked={todo.isCompleted ? true : false}
-            onChange={(e) =>
-              onChangeCheckbox({ event: e, todoId: todo.todoId })
-            }
-          />
-          <Flex flexDirection='column' marginLeft='8px'>
-            <Text fontWeight='bold'>{todo.title}</Text>
-            <Text fontSize='sm' color='gray.400' inlineSize='80vw'>
-              {todo.description}
-            </Text>
-          </Flex>
-        </Flex>
-      ))}
+        <TabPanels margin='0' padding='0'>
+          {tabList.map((tab, index) => (
+            <TabPanel key={index} margin='0' padding='0'>
+              {updTodos.map((todo, index) => (
+                <Flex
+                  key={index}
+                  flexDirection='row'
+                  border='1px'
+                  borderRadius='md'
+                  borderColor='gray.200'
+                  marginY='4px'
+                  padding='4px 8px'
+                  scrollSnapStop='always'
+                >
+                  <Checkbox
+                    key={todo.todoId}
+                    disabled={
+                      tab.status === 'all' || tab.status === 'plan'
+                        ? false
+                        : true
+                    }
+                    defaultChecked={todo.isCompleted ? true : false}
+                    onChange={(e) =>
+                      onChangeCheckbox({ event: e, todoId: todo.todoId })
+                    }
+                  />
+                  <Flex flexDirection='column' marginLeft='8px'>
+                    <Text fontWeight='bold'>{todo.title}</Text>
+                    <Text fontSize='sm' color='gray.400'>
+                      {todo.description}
+                    </Text>
+                  </Flex>
+                </Flex>
+              ))}
+            </TabPanel>
+          ))}
+        </TabPanels>
+      </Tabs>
       <Modal
         size='xs'
         isOpen={isOpen}

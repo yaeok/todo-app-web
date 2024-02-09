@@ -269,6 +269,7 @@ const TodoListView = () => {
         onClose={onClose}
         closeOnOverlayClick={false}
         isCentered
+        allowPinchZoom={true}
       >
         <ModalOverlay />
         <ModalContent>

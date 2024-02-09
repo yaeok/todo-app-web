@@ -221,6 +221,7 @@ const BookListView = () => {
         onClose={onClose}
         closeOnOverlayClick={false}
         isCentered
+        allowPinchZoom={false}
       >
         <ModalOverlay />
         <ModalContent>
